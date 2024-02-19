@@ -10,11 +10,20 @@ const extensions = await web3Enable("my cool dapp");
 const allAccounts = await web3Accounts({ extensions: extensions[0].name });
 const wsProvider = new WsProvider("wss://westend-asset-hub-rpc.polkadot.io");
 const api = await ApiPromise.create({ provider: wsProvider });
+const ASSET_ID = 8;
+const asset = {
+  parents: 0,
+  interior: {
+    X2: [{ PalletInstance: 50 }, { GeneralIndex: ASSET_ID }],
+  },
+};
 
 function App() {
   const [account, setAccount] = useState(allAccounts[0]);
   const [balance, setBalance] = useState("null");
-  const [recipientAddress, setRecipientAddress] = useState("");
+  const [recipientAddress, setRecipientAddress] = useState(
+    "5GnTRaKSNiBbRygtPb7UmFRaHhEmLW9PM3LBLSLt7Eb2qzSb"
+  );
   const [amount, setAmount] = useState("");
 
   const handleAccountChange = (event) => {
@@ -34,15 +43,19 @@ function App() {
 
   const handleTransact = async () => {
     const transferExtrinsic = api.tx.assets.transferKeepAlive(
-      8,
+      ASSET_ID,
       recipientAddress,
       BigInt(amount)
     );
+
     const injector = await web3FromSource(account.meta.source);
     transferExtrinsic
       .signAndSend(
         account.address,
-        { signer: injector.signer },
+        {
+          signer: injector.signer,
+          assetId: asset,
+        },
         ({ status }) => {
           if (status.isInBlock) {
             console.log(
@@ -60,7 +73,7 @@ function App() {
 
   useEffect(() => {
     api.query.assets
-      .account(8, account.address)
+      .account(ASSET_ID, account.address)
       .then(({ value }) => setBalance(value.balance.words[0]));
   }, [account]);
 
