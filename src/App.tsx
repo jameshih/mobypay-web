@@ -14,7 +14,9 @@ const api = await ApiPromise.create({ provider: wsProvider });
 function App() {
   const [account, setAccount] = useState(allAccounts[0]);
   const [balance, setBalance] = useState("null");
-  const [recipientAddress, setRecipientAddress] = useState("");
+  const [recipientAddress, setRecipientAddress] = useState(
+    "5GnTRaKSNiBbRygtPb7UmFRaHhEmLW9PM3LBLSLt7Eb2qzSb"
+  );
   const [amount, setAmount] = useState("");
 
   const handleAccountChange = (event) => {
@@ -38,11 +40,20 @@ function App() {
       recipientAddress,
       BigInt(amount)
     );
+
     const injector = await web3FromSource(account.meta.source);
     transferExtrinsic
       .signAndSend(
         account.address,
-        { signer: injector.signer },
+        {
+          signer: injector.signer,
+          assetId: {
+            parents: 0,
+            interior: {
+              X2: [{ PalletInstance: 50 }, { GeneralIndex: 8 }],
+            },
+          },
+        },
         ({ status }) => {
           if (status.isInBlock) {
             console.log(
