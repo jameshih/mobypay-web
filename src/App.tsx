@@ -150,7 +150,7 @@ function App() {
         <div className="space-y-4">
           {!selectedAccount ? (
             <>
-              <h1 className="text-sm text-center">
+              <h1 className="text-sm text-center font-bold">
                 Send USDC/USDT
                 <br />
                 and pay network fees with USDC/USDT on Polkadot Asset Hub

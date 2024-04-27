@@ -53,6 +53,9 @@ export const ConnectWallet: React.FC<Props> = () => {
 
   return (
     <div>
+      <h1 className="text-gray-600 text-xs text-center">
+        Polkadot.js Extension doesn't work
+      </h1>
       <button
         className="w-full border border-black px-4 py-2 rounded-xl hover:bg-gray-200"
         onClick={handleConnectWallet}
