@@ -1,11 +1,29 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { InjectedAccountWithMeta } from "@polkadot/extension-inject/types";
+import { Keyring } from "@polkadot/api";
+import { AccountContext } from "../hooks/useAccount";
 
-type Props = {
-  onAccounts: (accounts: InjectedAccountWithMeta[]) => void;
-};
+// type Props = {
+//   setAccounts: (accounts: InjectedAccountWithMeta[]) => void;
+//   setSelectedAccount: (account: string) => void;
+// };
 
-export const ConnectWallet: React.FC<Props> = ({ onAccounts }) => {
+const POLKADOT_ASSET_HUB = 0;
+function formatAddress(array, encode) {
+  const keyring = new Keyring();
+
+  if (encode === POLKADOT_ASSET_HUB)
+    return array.map((obj) => ({
+      ...obj,
+      address: keyring.encodeAddress(obj.address, encode),
+    }));
+
+  return array;
+}
+
+export const ConnectWallet: React.FC<Props> = () => {
+  const { selectAccount, updateAccounts } = useContext(AccountContext);
+
   const [connecting, setConnecting] = useState(false);
 
   const handleConnectWallet = async () => {
@@ -14,13 +32,17 @@ export const ConnectWallet: React.FC<Props> = ({ onAccounts }) => {
       "@polkadot/extension-dapp"
     );
     try {
-      const extensions = await web3Enable("Sign-In with Substrate Demo");
+      const extensions = await web3Enable("MobyPay");
 
       if (extensions.length === 0) {
-        onAccounts([]);
+        updateAccounts([]);
       } else {
-        const accounts = await web3Accounts();
-        onAccounts(accounts);
+        const accounts = formatAddress(
+          await web3Accounts({ extensions: ["talisman"] }),
+          POLKADOT_ASSET_HUB
+        );
+        updateAccounts(accounts);
+        selectAccount(accounts[0]);
       }
     } catch (e) {
       console.log(e);
@@ -30,12 +52,12 @@ export const ConnectWallet: React.FC<Props> = ({ onAccounts }) => {
   };
 
   return (
-    <div className="flex flex-col">
-      <p className="text-white text-lg">Try it out</p>
-      <p className="text-stone-500 mb-4">
-        Connect your wallet to try out this cloneable demo app.
-      </p>
-      <button onClick={handleConnectWallet} disabled={connecting}>
+    <div>
+      <button
+        className="w-full border border-black px-4 py-2 rounded-xl hover:bg-gray-200"
+        onClick={handleConnectWallet}
+        disabled={connecting}
+      >
         {connecting ? "Connecting wallet..." : "Connect Wallet"}
       </button>
     </div>
