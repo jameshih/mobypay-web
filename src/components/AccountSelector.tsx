@@ -5,17 +5,25 @@ import useAccount from "../hooks/useAccount";
 import { formatBalance } from "../utils/helper";
 import { ApiPromise } from "@polkadot/api";
 import { Account } from "../contexts/account";
+import { USDC, USDT } from "../utils/constants";
 
 interface QueryResult {
   balance?: string;
 }
 
-function ListItem({ getTokenBalance, account, selectAccount, setOpen }: {
-  getTokenBalance: (address: string, assetId: string) => Promise<string | undefined>,
-  account: Account,
-  selectAccount: (account: Account | undefined) => void,
-  setOpen: (open: boolean) => void
-
+function ListItem({
+  getTokenBalance,
+  account,
+  selectAccount,
+  setOpen,
+}: {
+  getTokenBalance: (
+    address: string,
+    assetId: string
+  ) => Promise<string | undefined>;
+  account: Account;
+  selectAccount: (account: Account | undefined) => void;
+  setOpen: (open: boolean) => void;
 }) {
   const [usdtBalance, setUSDTBalance] = useState<string>("0");
   const [usdcBalance, setUSDCBalance] = useState<string>("0");
@@ -23,11 +31,17 @@ function ListItem({ getTokenBalance, account, selectAccount, setOpen }: {
     const fetchBalance = async () => {
       try {
         //get USDC balance
-        const usdc_val = await getTokenBalance(account.address, "1337");
-        setUSDCBalance(usdc_val ?? '0');
+        const usdc_val = await getTokenBalance(
+          account.address,
+          `${USDC.ASSET_ID}`
+        );
+        setUSDCBalance(usdc_val ?? "0");
         //get USDT balance
-        const usdt_val = await getTokenBalance(account.address, "1984");
-        setUSDTBalance(usdt_val ?? '0');
+        const usdt_val = await getTokenBalance(
+          account.address,
+          `${USDT.ASSET_ID}`
+        );
+        setUSDTBalance(usdt_val ?? "0");
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -93,11 +107,17 @@ function AccountSelector({ api }: { api: ApiPromise }) {
     const fetchBalance = async () => {
       try {
         //get USDC balance
-        const usdc_val = await getTokenBalance(selectedAccount.address, "1337");
-        setUSDCBalance(usdc_val ?? '0');
+        const usdc_val = await getTokenBalance(
+          selectedAccount.address,
+          `${USDC.ASSET_ID}`
+        );
+        setUSDCBalance(usdc_val ?? "0");
         //get USDT balance
-        const usdt_val = await getTokenBalance(selectedAccount.address, "1984");
-        setUSDTBalance(usdt_val ?? '0');
+        const usdt_val = await getTokenBalance(
+          selectedAccount.address,
+          `${USDT.ASSET_ID}`
+        );
+        setUSDTBalance(usdt_val ?? "0");
       } catch (error) {
         console.error("Error fetching data:", error);
       }

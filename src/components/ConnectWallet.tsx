@@ -2,13 +2,8 @@ import { Keyring } from "@polkadot/api";
 import { useState } from "react";
 import useAccount from "../hooks/useAccount";
 import { Account } from "../contexts/account";
+import { POLKADOT_ASSET_HUB } from "../utils/constants";
 
-// type Props = {
-//   setAccounts: (accounts: InjectedAccountWithMeta[]) => void;
-//   setSelectedAccount: (account: string) => void;
-// };
-
-const POLKADOT_ASSET_HUB = 0;
 function formatAddress(accounts: Account[], encode: number) {
   const keyring = new Keyring();
 
