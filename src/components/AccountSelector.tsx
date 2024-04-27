@@ -43,7 +43,7 @@ function ListItem({ api, getTokenBalance, elm, selectAccount, setOpen }) {
       <div className="flex items-center justify-center space-x-8">
         <Identicon value={elm.address} size={64} theme="polkadot" />
         <div className="text-left">
-          <h1>Balance</h1>
+          <h1 className="font-bold">Balance</h1>
           <h2>{formatBalance(usdcBalance, 2)} USDC</h2>
           <h2>{formatBalance(usdtBalance, 2)} USDT</h2>
         </div>
@@ -120,7 +120,7 @@ function AccountSelector({ api }) {
               ))}
               <li
                 onClick={handleDisconnectWallet}
-                className="py-2 hover:bg-red-400 cursor-pointer"
+                className="py-4 hover:bg-red-400 cursor-pointer font-bold"
               >
                 Disconnect
               </li>
@@ -128,7 +128,7 @@ function AccountSelector({ api }) {
           </>
         ) : (
           <>
-            <h1 className="pb-2 pl-2">My account</h1>
+            <h1 className="pb-2 pl-2 font-bold">My account</h1>
             <button
               className="w-full border border-black rounded-lg px-4 py-2 space-y-2 cursor-pointer hover:bg-gray-200"
               onClick={() => setOpen(true)}
@@ -144,7 +144,7 @@ function AccountSelector({ api }) {
                   theme="polkadot"
                 />
                 <div className="text-left">
-                  <h1>Balance</h1>
+                  <h1 className="font-bold">Balance</h1>
                   <h2>{formatBalance(usdcBalance, 2)} USDC</h2>
                   <h2>{formatBalance(usdtBalance, 2)} USDT</h2>
                 </div>

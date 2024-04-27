@@ -21,5 +21,9 @@ Works with Talisman Browser Extension, doesn't work with Polkadotjs Extension.
   - [x] Fetch and auto refresh Estimated Fee (based on block number)
   - [x] Pay transaction fees with USDC/USDT
 - Info
+
   - [x] Transaction processing status (Toast)
   - [x] Error messages (Toast)
+
+- [ ] Make the codebase type safe
+- [ ] Color the ui

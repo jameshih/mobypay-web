@@ -148,12 +148,23 @@ function App() {
     <div className="min-h-screen flex items-center justify-center">
       {api ? (
         <div className="space-y-4">
-          {!selectedAccount ? <ConnectWallet /> : <AccountSelector api={api} />}
+          {!selectedAccount ? (
+            <>
+              <h1 className="text-sm text-center">
+                Send USDC/USDT
+                <br />
+                and pay network fees with USDC/USDT on Polkadot Asset Hub
+              </h1>
+              <ConnectWallet />
+            </>
+          ) : (
+            <AccountSelector api={api} />
+          )}
 
-          {/* TODO: Form */}
+          {/* TODO: Move Form into its own compoenent */}
           <div className="border border-black rounded-lg p-4 space-y-4">
             <div className="space-y-2">
-              <h1 className="pl-1">Recipient</h1>
+              <h1 className="pl-1 font-bold">Recipient</h1>
               <input
                 className="w-full border border-black rounded-lg p-4"
                 type="text"
@@ -165,7 +176,7 @@ function App() {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <h1 className="pl-1">Amount</h1>
+                <h1 className="pl-1 font-bold">Amount</h1>
                 {selectedAccount && (
                   <span className="pr-8 text-gray-500">
                     {`Available: ${formatBalance(
@@ -185,7 +196,7 @@ function App() {
                 />
 
                 <select
-                  className="h-14 border border-black rounded-r-lg px-4 py-1 box-border appearance-none hover:bg-gray-200 cursor-pointer"
+                  className="h-14 border border-black border-l-0 rounded-r-lg px-4 py-1 box-border appearance-none hover:bg-gray-200 cursor-pointer font-bold"
                   value={selectedToken}
                   onChange={(event) => setSelectedToken(event.target.value)}
                 >
@@ -199,7 +210,7 @@ function App() {
               </div>
             </div>
             <button
-              className={`w-full border border-black p-4 rounded-lg ${
+              className={`w-full border border-black p-4 rounded-lg font-bold ${
                 transacting
                   ? "bg-gray-200"
                   : "hover:bg-gray-200 active:bg-gray-200"
@@ -210,9 +221,34 @@ function App() {
               {transacting ? "Sending..." : "Send"}
             </button>
           </div>
+          <div className="text-center text-xs text-gray-600 space-x-2 space-y-2">
+            <span> This is still a work in progress, so use with caution!</span>
+            <a
+              className="underline"
+              href="https://github.com/jameshih/mobypay-web"
+              target="_blank"
+            >
+              <span>Source code</span>
+            </a>
+            <div>
+              <span>
+                Check out{" "}
+                <a
+                  className="underline italic font-bold"
+                  href="https://mobypay.cc"
+                  target="_blank"
+                >
+                  MobyPay wallet
+                </a>{" "}
+                (use USDC/USDT on the go!)
+              </span>
+            </div>
+          </div>
         </div>
       ) : (
-        <div>Loading...</div>
+        <span>
+          ⚡ Connecting to <span className="italic">Polkadot Asset Hub</span>...
+        </span>
       )}
       <Toaster position="top-center" reverseOrder={false} />
     </div>
