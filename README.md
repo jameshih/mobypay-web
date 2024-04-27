@@ -1,3 +1,5 @@
-# Westend Asset Hub Polkadot.js test
+# MobyPay Web tool
 
-Transacting with JOE TEST TOKENS and paying transaction fees in JOE TEST TOKENS, no WND required!
+Transact USDC/USDT on Polkadot Asset Hub and paying fees in USDC/USDT, no DOT required.
+
+Works with Talisman Browser Extension, doesn't work with Polkadotjs Extension.
