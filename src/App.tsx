@@ -5,6 +5,7 @@ import {
   web3FromSource,
 } from "@polkadot/extension-dapp";
 import { useEffect, useState } from "react";
+import { ConnectWallet } from "./components/ConnectWallet";
 
 const POLKADOT_ASSET_HUB = 0;
 const extensions = await web3Enable("my cool dapp");
@@ -95,6 +96,7 @@ function App() {
 
   return (
     <div>
+      <ConnectWallet />
       <div>
         <label>From: </label>
         {allAccounts && (
