@@ -1,16 +1,16 @@
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { web3FromSource } from "@polkadot/extension-dapp";
-import { useContext, useEffect, useState } from "react";
-import { ConnectWallet } from "./components/ConnectWallet";
+import { useEffect, useState } from "react";
 import AccountSelector from "./components/AccountSelector";
+import { ConnectWallet } from "./components/ConnectWallet";
 import "./index.css";
-import { AccountContext } from "./hooks/useAccount";
 import toast, { Toaster } from "react-hot-toast";
-import { formatBalance } from "./utils/helper";
+import useAccount from "./hooks/useAccount";
 import { DECIMAL } from "./utils/constants";
+import { formatBalance } from "./utils/helper";
 
 function App() {
-  const { selectedAccount } = useContext(AccountContext);
+  const { selectedAccount } = useAccount()
 
   const [recipientAddress, setRecipientAddress] = useState("");
   const [amount, setAmount] = useState("");
@@ -19,15 +19,16 @@ function App() {
   const [seletedTokenBalance, setSelectedTokenBalance] = useState();
   const [transacting, setTransacting] = useState(false);
 
-  const handleRecipientChange = (event) => {
+  const handleRecipientChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRecipientAddress(event.target.value);
   };
 
-  const handleAmountChange = (event) => {
+  const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAmount(event.target.value);
   };
 
   const handleTransact = async () => {
+    if (!selectedAccount) return;
     setTransacting(true);
     if (!api) {
       toast.error("Cannot connect to the blockchain!");
@@ -80,7 +81,7 @@ function App() {
             }
           }
         )
-        .catch((error: any) => {
+        .catch((error: Error) => {
           toast.error(`:( transaction failed ${error}`);
           setTransacting(false);
         });
@@ -90,7 +91,7 @@ function App() {
     }
   };
 
-  async function getTokenBalance(address, assetId) {
+  async function getTokenBalance(address: string, assetId: string) {
     const query_result: Codec | null = await api?.query.assets.account(
       assetId,
       address
@@ -210,11 +211,10 @@ function App() {
               </div>
             </div>
             <button
-              className={`w-full border border-black p-4 rounded-lg font-bold ${
-                transacting
-                  ? "bg-gray-200"
-                  : "hover:bg-gray-200 active:bg-gray-200"
-              }`}
+              className={`w-full border border-black p-4 rounded-lg font-bold ${transacting
+                ? "bg-gray-200"
+                : "hover:bg-gray-200 active:bg-gray-200"
+                }`}
               onClick={handleTransact}
               disabled={transacting}
             >

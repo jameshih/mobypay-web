@@ -1,7 +1,7 @@
-import { useContext, useState } from "react";
-import { InjectedAccountWithMeta } from "@polkadot/extension-inject/types";
 import { Keyring } from "@polkadot/api";
-import { AccountContext } from "../hooks/useAccount";
+import { useState } from "react";
+import useAccount from "../hooks/useAccount";
+import { Account } from "../contexts/account";
 
 // type Props = {
 //   setAccounts: (accounts: InjectedAccountWithMeta[]) => void;
@@ -9,20 +9,20 @@ import { AccountContext } from "../hooks/useAccount";
 // };
 
 const POLKADOT_ASSET_HUB = 0;
-function formatAddress(array, encode) {
+function formatAddress(accounts: Account[], encode: number) {
   const keyring = new Keyring();
 
   if (encode === POLKADOT_ASSET_HUB)
-    return array.map((obj) => ({
+    return accounts.map((obj) => ({
       ...obj,
       address: keyring.encodeAddress(obj.address, encode),
     }));
 
-  return array;
+  return accounts;
 }
 
-export const ConnectWallet: React.FC<Props> = () => {
-  const { selectAccount, updateAccounts } = useContext(AccountContext);
+export const ConnectWallet: React.FC = () => {
+  const { selectAccount, updateAccounts } = useAccount();
 
   const [connecting, setConnecting] = useState(false);
 
