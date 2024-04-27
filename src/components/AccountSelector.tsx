@@ -1,25 +1,41 @@
-import { useContext, useEffect, useState } from "react";
 import Identicon from "@polkadot/react-identicon";
-import { Codec } from "@polkadot/types-codec/types";
-import { AccountContext } from "../hooks/useAccount";
-import { formatBalance } from "../utils/helper";
+import { useEffect, useState } from "react";
+import useAccount from "../hooks/useAccount";
+import { formatBalance, getTokenBalance } from "../utils/helper";
+import { ApiPromise } from "@polkadot/api";
+import { Account } from "../contexts/account";
+import { USDC, USDT } from "../utils/constants";
 
-interface QueryResult {
-  balance?: string;
-}
-
-function ListItem({ api, getTokenBalance, elm, selectAccount, setOpen }) {
+function ListItem({
+  account,
+  selectAccount,
+  setOpen,
+  api,
+}: {
+  account: Account;
+  selectAccount: (account: Account | undefined) => void;
+  setOpen: (open: boolean) => void;
+  api: ApiPromise;
+}) {
   const [usdtBalance, setUSDTBalance] = useState<string>("0");
   const [usdcBalance, setUSDCBalance] = useState<string>("0");
   useEffect(() => {
     const fetchBalance = async () => {
       try {
         //get USDC balance
-        const usdc_val = await getTokenBalance(elm.address, "1337");
-        setUSDCBalance(usdc_val);
+        const usdc_val = await getTokenBalance(
+          account.address,
+          `${USDC.ASSET_ID}`,
+          api!
+        );
+        setUSDCBalance(usdc_val ?? "0");
         //get USDT balance
-        const usdt_val = await getTokenBalance(elm.address, "1984");
-        setUSDTBalance(usdt_val);
+        const usdt_val = await getTokenBalance(
+          account.address,
+          `${USDT.ASSET_ID}`,
+          api!
+        );
+        setUSDTBalance(usdt_val ?? "0");
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -36,59 +52,62 @@ function ListItem({ api, getTokenBalance, elm, selectAccount, setOpen }) {
     <li
       className="border-b border-black px-4 py-2 space-y-2 cursor-pointer hover:bg-gray-200"
       onClick={() => {
-        selectAccount(elm);
+        selectAccount(account);
         setOpen(false);
       }}
     >
       <div className="flex items-center justify-center space-x-8">
-        <Identicon value={elm.address} size={64} theme="polkadot" />
+        <Identicon value={account.address} size={64} theme="polkadot" />
         <div className="text-left">
           <h1 className="font-bold">Balance</h1>
           <h2>{formatBalance(usdcBalance, 2)} USDC</h2>
           <h2>{formatBalance(usdtBalance, 2)} USDT</h2>
         </div>
       </div>
-      <p>{elm.address}</p>
+      <p>{account.address}</p>
     </li>
   );
 }
 
-function AccountSelector({ api }) {
+interface AccountSelectorProps {
+  api: ApiPromise;
+}
+
+const AccountSelector: React.FC<AccountSelectorProps> = ({
+  api,
+}: {
+  api: ApiPromise;
+}) => {
   const { accounts, selectedAccount, selectAccount, updateAccounts } =
-    useContext(AccountContext);
+    useAccount();
 
   const [open, setOpen] = useState(false);
   const [usdtBalance, setUSDTBalance] = useState<string>("0");
   const [usdcBalance, setUSDCBalance] = useState<string>("0");
 
-  async function getTokenBalance(address, assetId) {
-    const query_result: Codec | null = await api?.query.assets.account(
-      assetId,
-      address
-    );
-
-    if (query_result?.toJSON() != null) {
-      const { balance: accountBalance } = query_result?.toJSON() as QueryResult;
-      return accountBalance;
-    } else {
-      return "0";
-    }
-  }
-
   const handleDisconnectWallet = () => {
-    updateAccounts(null);
-    selectAccount(null);
+    updateAccounts([]);
+    selectAccount(undefined);
   };
 
   useEffect(() => {
+    if (!selectedAccount) return;
     const fetchBalance = async () => {
       try {
         //get USDC balance
-        const usdc_val = await getTokenBalance(selectedAccount.address, "1337");
-        setUSDCBalance(usdc_val);
+        const usdc_val = await getTokenBalance(
+          selectedAccount.address,
+          `${USDC.ASSET_ID}`,
+          api!
+        );
+        setUSDCBalance(usdc_val ?? "0");
         //get USDT balance
-        const usdt_val = await getTokenBalance(selectedAccount.address, "1984");
-        setUSDTBalance(usdt_val);
+        const usdt_val = await getTokenBalance(
+          selectedAccount.address,
+          `${USDT.ASSET_ID}`,
+          api!
+        );
+        setUSDTBalance(usdt_val ?? "0");
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -108,14 +127,13 @@ function AccountSelector({ api }) {
           <>
             <h1 className="pt-4 pb-2 pl-2">Select an account</h1>
             <ul className="border border-black rounded-lg text-center">
-              {accounts.map((elm, index) => (
+              {accounts.map((account) => (
                 <ListItem
-                  key={elm.address}
-                  elm={elm}
+                  key={account.address}
+                  account={account}
                   selectAccount={selectAccount}
                   setOpen={setOpen}
                   api={api}
-                  getTokenBalance={getTokenBalance}
                 />
               ))}
               <li
@@ -149,13 +167,13 @@ function AccountSelector({ api }) {
                   <h2>{formatBalance(usdtBalance, 2)} USDT</h2>
                 </div>
               </div>
-              <p>{selectedAccount.address}</p>
+              <p>{selectedAccount?.address}</p>
             </button>
           </>
         )}
       </div>
     </>
   );
-}
+};
 
 export default AccountSelector;

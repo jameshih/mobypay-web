@@ -1,33 +1,36 @@
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { web3FromSource } from "@polkadot/extension-dapp";
-import { useContext, useEffect, useState } from "react";
-import { ConnectWallet } from "./components/ConnectWallet";
+import { useEffect, useState } from "react";
 import AccountSelector from "./components/AccountSelector";
+import { ConnectWallet } from "./components/ConnectWallet";
 import "./index.css";
-import { AccountContext } from "./hooks/useAccount";
 import toast, { Toaster } from "react-hot-toast";
-import { formatBalance } from "./utils/helper";
-import { DECIMAL } from "./utils/constants";
+import useAccount from "./hooks/useAccount";
+import { DECIMAL, USDC, USDT, WS_URL } from "./utils/constants";
+import { formatBalance, getTokenBalance } from "./utils/helper";
 
-function App() {
-  const { selectedAccount } = useContext(AccountContext);
+const App: React.FC = () => {
+  const { selectedAccount } = useAccount();
 
-  const [recipientAddress, setRecipientAddress] = useState("");
-  const [amount, setAmount] = useState("");
-  const [api, setApi] = useState<ApiPromise | null>(null);
-  const [selectedToken, setSelectedToken] = useState("USDC");
-  const [seletedTokenBalance, setSelectedTokenBalance] = useState();
+  const [recipientAddress, setRecipientAddress] = useState<string>("");
+  const [amount, setAmount] = useState<string>("");
+  const [api, setApi] = useState<ApiPromise>();
+  const [selectedToken, setSelectedToken] = useState<string>("USDC");
+  const [seletedTokenBalance, setSelectedTokenBalance] = useState<string>("0");
   const [transacting, setTransacting] = useState(false);
 
-  const handleRecipientChange = (event) => {
+  const handleRecipientChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setRecipientAddress(event.target.value);
   };
 
-  const handleAmountChange = (event) => {
+  const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAmount(event.target.value);
   };
 
   const handleTransact = async () => {
+    if (!selectedAccount) return;
     setTransacting(true);
     if (!api) {
       toast.error("Cannot connect to the blockchain!");
@@ -46,7 +49,7 @@ function App() {
       return;
     }
     try {
-      const assetID = selectedToken == "USDC" ? 1337 : 1984;
+      const assetID = selectedToken == "USDC" ? USDC.ASSET_ID : USDT.ASSET_ID;
       const amountToSend = parseFloat(amount) * DECIMAL;
 
       const transferExtrinsic = api?.tx.assets.transferKeepAlive(
@@ -80,7 +83,7 @@ function App() {
             }
           }
         )
-        .catch((error: any) => {
+        .catch((error: Error) => {
           toast.error(`:( transaction failed ${error}`);
           setTransacting(false);
         });
@@ -90,47 +93,32 @@ function App() {
     }
   };
 
-  async function getTokenBalance(address, assetId) {
-    const query_result: Codec | null = await api?.query.assets.account(
-      assetId,
-      address
-    );
-
-    if (query_result?.toJSON() != null) {
-      const { balance: accountBalance } = query_result?.toJSON() as QueryResult;
-      return accountBalance;
-    } else {
-      return "0";
-    }
-  }
-
   useEffect(() => {
     (async () => {
       try {
         const ap = await ApiPromise.create({
-          provider: new WsProvider("wss://statemint-rpc.dwellir.com"),
+          provider: new WsProvider(WS_URL),
           noInitWarn: true,
         });
         setApi(ap);
+        console.log(ap);
       } catch (error) {
         console.log(error);
       }
     })();
-
-    return () => {
-      if (api) {
-        console.log("api disconnect");
-        api.disconnect();
-      }
-    };
   }, []);
 
   useEffect(() => {
     if (!selectedAccount) return;
     const fetchBalance = async () => {
       try {
-        const assetID = selectedToken == "USDC" ? "1337" : "1984";
-        const val = await getTokenBalance(selectedAccount.address, assetID);
+        const assetID =
+          selectedToken == "USDC" ? `${USDC.ASSET_ID}` : `${USDT.ASSET_ID}`;
+        const val: string = await getTokenBalance(
+          selectedAccount.address,
+          assetID,
+          api!
+        );
         setSelectedTokenBalance(val);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -142,7 +130,7 @@ function App() {
     const intervalId = setInterval(fetchBalance, 30000);
 
     return () => clearInterval(intervalId);
-  }, [selectedAccount, selectedToken]);
+  });
 
   return (
     <div className="min-h-screen flex items-center justify-center">
@@ -253,6 +241,6 @@ function App() {
       <Toaster position="top-center" reverseOrder={false} />
     </div>
   );
-}
+};
 
 export default App;

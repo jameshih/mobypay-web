@@ -1,30 +1,13 @@
-import React, { createContext, useState, useContext } from "react";
+import { useContext } from 'react'
+import { AccountContext } from '../contexts/account'
 
-// Create a context
-const AccountContext = createContext();
 
-// Provider component
-function AccountProvider({ children }) {
-  const [accounts, setAccounts] = useState([]);
-  const [selectedAccount, setSelectedAccount] = useState(null);
-
-  // Function to update accounts
-  const updateAccounts = (newAccounts) => {
-    setAccounts(newAccounts);
-  };
-
-  // Function to select an account
-  const selectAccount = (account) => {
-    setSelectedAccount(account);
-  };
-
-  return (
-    <AccountContext.Provider
-      value={{ accounts, selectedAccount, updateAccounts, selectAccount }}
-    >
-      {children}
-    </AccountContext.Provider>
-  );
+const useAccount = () => {
+  const context = useContext(AccountContext)
+  if (context === undefined) {
+    throw new Error('useAccount must be used within an AccountProvider')
+  }
+  return context
 }
 
-export { AccountProvider, AccountContext };
+export default useAccount
