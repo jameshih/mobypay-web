@@ -7,16 +7,16 @@ import "./index.css";
 import toast, { Toaster } from "react-hot-toast";
 import useAccount from "./hooks/useAccount";
 import { DECIMAL, USDC, USDT, WS_URL } from "./utils/constants";
-import { formatBalance } from "./utils/helper";
+import { formatBalance, getTokenBalance } from "./utils/helper";
 
-function App() {
+const App: React.FC = () => {
   const { selectedAccount } = useAccount();
 
-  const [recipientAddress, setRecipientAddress] = useState("");
-  const [amount, setAmount] = useState("");
-  const [api, setApi] = useState<ApiPromise | null>(null);
-  const [selectedToken, setSelectedToken] = useState("USDC");
-  const [seletedTokenBalance, setSelectedTokenBalance] = useState();
+  const [recipientAddress, setRecipientAddress] = useState<string>("");
+  const [amount, setAmount] = useState<string>("");
+  const [api, setApi] = useState<ApiPromise>();
+  const [selectedToken, setSelectedToken] = useState<string>("USDC");
+  const [seletedTokenBalance, setSelectedTokenBalance] = useState<string>("0");
   const [transacting, setTransacting] = useState(false);
 
   const handleRecipientChange = (
@@ -93,20 +93,6 @@ function App() {
     }
   };
 
-  async function getTokenBalance(address: string, assetId: string) {
-    const query_result: Codec | null = await api?.query.assets.account(
-      assetId,
-      address
-    );
-
-    if (query_result?.toJSON() != null) {
-      const { balance: accountBalance } = query_result?.toJSON() as QueryResult;
-      return accountBalance;
-    } else {
-      return "0";
-    }
-  }
-
   useEffect(() => {
     (async () => {
       try {
@@ -115,17 +101,11 @@ function App() {
           noInitWarn: true,
         });
         setApi(ap);
+        console.log(ap);
       } catch (error) {
         console.log(error);
       }
     })();
-
-    return () => {
-      if (api) {
-        console.log("api disconnect");
-        api.disconnect();
-      }
-    };
   }, []);
 
   useEffect(() => {
@@ -134,7 +114,11 @@ function App() {
       try {
         const assetID =
           selectedToken == "USDC" ? `${USDC.ASSET_ID}` : `${USDT.ASSET_ID}`;
-        const val = await getTokenBalance(selectedAccount.address, assetID);
+        const val: string = await getTokenBalance(
+          selectedAccount.address,
+          assetID,
+          api!
+        );
         setSelectedTokenBalance(val);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -146,7 +130,7 @@ function App() {
     const intervalId = setInterval(fetchBalance, 30000);
 
     return () => clearInterval(intervalId);
-  }, [selectedAccount, selectedToken]);
+  });
 
   return (
     <div className="min-h-screen flex items-center justify-center">
@@ -257,6 +241,6 @@ function App() {
       <Toaster position="top-center" reverseOrder={false} />
     </div>
   );
-}
+};
 
 export default App;

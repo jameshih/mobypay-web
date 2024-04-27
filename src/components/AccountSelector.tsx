@@ -1,29 +1,21 @@
 import Identicon from "@polkadot/react-identicon";
-import { Codec } from "@polkadot/types-codec/types";
 import { useEffect, useState } from "react";
 import useAccount from "../hooks/useAccount";
-import { formatBalance } from "../utils/helper";
+import { formatBalance, getTokenBalance } from "../utils/helper";
 import { ApiPromise } from "@polkadot/api";
 import { Account } from "../contexts/account";
 import { USDC, USDT } from "../utils/constants";
 
-interface QueryResult {
-  balance?: string;
-}
-
 function ListItem({
-  getTokenBalance,
   account,
   selectAccount,
   setOpen,
+  api,
 }: {
-  getTokenBalance: (
-    address: string,
-    assetId: string
-  ) => Promise<string | undefined>;
   account: Account;
   selectAccount: (account: Account | undefined) => void;
   setOpen: (open: boolean) => void;
+  api: ApiPromise;
 }) {
   const [usdtBalance, setUSDTBalance] = useState<string>("0");
   const [usdcBalance, setUSDCBalance] = useState<string>("0");
@@ -33,13 +25,15 @@ function ListItem({
         //get USDC balance
         const usdc_val = await getTokenBalance(
           account.address,
-          `${USDC.ASSET_ID}`
+          `${USDC.ASSET_ID}`,
+          api!
         );
         setUSDCBalance(usdc_val ?? "0");
         //get USDT balance
         const usdt_val = await getTokenBalance(
           account.address,
-          `${USDT.ASSET_ID}`
+          `${USDT.ASSET_ID}`,
+          api!
         );
         setUSDTBalance(usdt_val ?? "0");
       } catch (error) {
@@ -75,27 +69,21 @@ function ListItem({
   );
 }
 
-function AccountSelector({ api }: { api: ApiPromise }) {
+interface AccountSelectorProps {
+  api: ApiPromise;
+}
+
+const AccountSelector: React.FC<AccountSelectorProps> = ({
+  api,
+}: {
+  api: ApiPromise;
+}) => {
   const { accounts, selectedAccount, selectAccount, updateAccounts } =
     useAccount();
 
   const [open, setOpen] = useState(false);
   const [usdtBalance, setUSDTBalance] = useState<string>("0");
   const [usdcBalance, setUSDCBalance] = useState<string>("0");
-
-  async function getTokenBalance(address: string, assetId: string) {
-    const query_result: Codec | null = await api?.query.assets.account(
-      assetId,
-      address
-    );
-
-    if (query_result?.toJSON() != null) {
-      const { balance: accountBalance } = query_result?.toJSON() as QueryResult;
-      return accountBalance;
-    } else {
-      return "0";
-    }
-  }
 
   const handleDisconnectWallet = () => {
     updateAccounts([]);
@@ -109,13 +97,15 @@ function AccountSelector({ api }: { api: ApiPromise }) {
         //get USDC balance
         const usdc_val = await getTokenBalance(
           selectedAccount.address,
-          `${USDC.ASSET_ID}`
+          `${USDC.ASSET_ID}`,
+          api!
         );
         setUSDCBalance(usdc_val ?? "0");
         //get USDT balance
         const usdt_val = await getTokenBalance(
           selectedAccount.address,
-          `${USDT.ASSET_ID}`
+          `${USDT.ASSET_ID}`,
+          api!
         );
         setUSDTBalance(usdt_val ?? "0");
       } catch (error) {
@@ -143,7 +133,7 @@ function AccountSelector({ api }: { api: ApiPromise }) {
                   account={account}
                   selectAccount={selectAccount}
                   setOpen={setOpen}
-                  getTokenBalance={getTokenBalance}
+                  api={api}
                 />
               ))}
               <li
@@ -184,6 +174,6 @@ function AccountSelector({ api }: { api: ApiPromise }) {
       </div>
     </>
   );
-}
+};
 
 export default AccountSelector;
