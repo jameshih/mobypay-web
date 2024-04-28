@@ -7,7 +7,7 @@ import "./index.css";
 import toast, { Toaster } from "react-hot-toast";
 import useAccount from "./hooks/useAccount";
 import { DECIMAL, USDC, USDT, WS_URL } from "./utils/constants";
-import { formatBalance, getTokenBalance } from "./utils/helper";
+import { estimateFee, formatBalance, getTokenBalance } from "./utils/helper";
 
 const App: React.FC = () => {
   const { selectedAccount } = useAccount();
@@ -18,6 +18,7 @@ const App: React.FC = () => {
   const [selectedToken, setSelectedToken] = useState<string>("USDC");
   const [seletedTokenBalance, setSelectedTokenBalance] = useState<string>("0");
   const [transacting, setTransacting] = useState(false);
+  const [fee, setFee] = useState<string>("");
 
   const handleRecipientChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -186,7 +187,19 @@ const App: React.FC = () => {
                 <select
                   className="h-14 border border-black border-l-0 rounded-r-lg px-4 py-1 box-border appearance-none hover:bg-gray-200 cursor-pointer font-bold"
                   value={selectedToken}
-                  onChange={(event) => setSelectedToken(event.target.value)}
+                  onChange={async (event) => {
+                    setSelectedToken(event.target.value);
+                    // TODO: Fix estimateFee
+                    setFee(
+                      await estimateFee(
+                        event.target.value,
+                        recipientAddress,
+                        amount,
+                        selectedAccount!,
+                        api!
+                      )
+                    );
+                  }}
                 >
                   <option key="USDC" value="USDC">
                     USDC
@@ -196,6 +209,9 @@ const App: React.FC = () => {
                   </option>
                 </select>
               </div>
+            </div>
+            <div className="text-right pr-1">
+              Estimated fee: {fee} {selectedToken}
             </div>
             <button
               className={`w-full border border-black p-4 rounded-lg font-bold ${
