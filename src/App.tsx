@@ -26,8 +26,19 @@ const App: React.FC = () => {
     setRecipientAddress(event.target.value);
   };
 
-  const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAmountChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setAmount(event.target.value);
+    setFee(
+      await estimateFee(
+        selectedToken == "USDC" ? USDC.ASSET_ID : USDT.ASSET_ID,
+        recipientAddress,
+        event.target.value,
+        selectedAccount!,
+        api!
+      )
+    );
   };
 
   const handleTransact = async () => {
@@ -189,10 +200,11 @@ const App: React.FC = () => {
                   value={selectedToken}
                   onChange={async (event) => {
                     setSelectedToken(event.target.value);
-                    // TODO: Fix estimateFee
                     setFee(
                       await estimateFee(
-                        event.target.value,
+                        event.target.value == "USDC"
+                          ? USDC.ASSET_ID
+                          : USDT.ASSET_ID,
                         recipientAddress,
                         amount,
                         selectedAccount!,
@@ -211,7 +223,19 @@ const App: React.FC = () => {
               </div>
             </div>
             <div className="text-right pr-1">
-              Estimated fee: {fee} {selectedToken}
+              Estimated fee: {fee && formatBalance(fee, 5)} {selectedToken}
+            </div>
+            <div className="text-right pr-1">
+              Total:{" "}
+              <span className="font-bold">
+                {fee &&
+                  amount &&
+                  formatBalance(
+                    (parseFloat(amount) * DECIMAL + parseFloat(fee)).toString(),
+                    5
+                  )}{" "}
+                {selectedToken}
+              </span>
             </div>
             <button
               className={`w-full border border-black p-4 rounded-lg font-bold ${

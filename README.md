@@ -18,7 +18,7 @@ Works with Talisman Browser Extension, doesn't work with Polkadotjs Extension.
   - [x] Amount to send input
   - [x] Select USDC or USDT to send
   - [x] Display selected coin's available balance
-  - [ ] Fetch and auto refresh Estimated Fee (based on block number)
+  - [x] Fetch and auto refresh Estimated Fee (based on amount and selectedToken change)
   - [x] Pay transaction fees with USDC/USDT
 - Info
   - [x] Transaction processing status (Toast)
