@@ -12,7 +12,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@polkadot/api": "^11.0.2",
+    "@polkadot/api": "^12.0.2",
     "@polkadot/extension-dapp": "^0.46.6",
     "@polkadot/react-identicon": "^3.6.6",
     "react": "^18.2.0",
@@ -35,9 +35,6 @@
     "typescript": "^5.2.2",
     "vite": "^5.1.0",
     "vite-plugin-radar": "^0.9.4"
-  },
-  "resolutions": {
-    "@polkadot/api": "^11.0.1"
   },
   "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
 }
