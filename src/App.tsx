@@ -263,7 +263,7 @@ const App: React.FC = () => {
                 Check out{" "}
                 <a
                   className="underline italic font-bold"
-                  href="https://mobypay.cc"
+                  href="https://mobypay.pwa.shih.app"
                   target="_blank"
                 >
                   MobyPay wallet
